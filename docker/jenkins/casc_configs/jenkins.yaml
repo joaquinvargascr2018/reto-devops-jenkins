@@ -1,0 +1,20 @@
+jenkins:
+  mode: NORMAL
+  numExecutors: 2
+  slaveAgentPort: 50000
+unclassified:
+  gitHubPluginConfig:
+    hookUrl: "http://localhost:8080/github-webhook/"
+  gitSCM:
+    createAccountBasedOnEmail: false
+    globalConfigEmail: "joavarvi@gmail.com"
+    globalConfigName: "Jenkins - Pura Vida"
+    showEntireCommitSummaryInChanges: false
+    useExistingAccountWithSameEmail: false
+  globalSettings:
+    failOnCorrupt: false
+    noAuthors: false
+    quietMode: false
+  location:
+    adminAddress: "Jenkins Pura Vida...! <joavarvi@gmail.com>"
+    url: "http://localhost:8080/"

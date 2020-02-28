@@ -1,0 +1,55 @@
+version: '3'
+
+services:
+  jenkins:
+    build: ./docker/jenkins/
+    container_name: "${PROJECT_NAME}_jenkins"
+    volumes:
+      - "/var/run/docker.sock:/var/run/docker.sock"
+      - "jenkins_home:/var/jenkins_home"
+      - "./src/jobs:/var/jenkins_home/jobs/SeedJob/workspace"
+      - "./test:/tmp/test"
+    labels:
+      - "traefik.http.services.${PROJECT_NAME}_jenkins.loadbalancer.server.port=8080"
+      - "traefik.http.routers.${PROJECT_NAME}_jenkins.rule=Host(`${PROJECT_BASE_URL}`)"
+
+  portainer:
+    image: portainer/portainer
+    container_name: "${PROJECT_NAME}_portainer"
+    command: --no-auth -H unix:///var/run/docker.sock
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    labels:
+      - "traefik.http.routers.${PROJECT_NAME}_portainer.rule=Host(`portainer.${PROJECT_BASE_URL}`)"
+
+  syslog:
+    image: pbertera/syslogserver
+    container_name: "${PROJECT_NAME}_syslog"
+    environment:
+      SYSLOG_USERNAME: $SYSLOG_USERNAME
+      SYSLOG_PASSWORD: $SYSLOG_PASSWORD
+    labels:
+      - "traefik.http.routers.${PROJECT_NAME}_syslog.rule=Host(`syslog.${PROJECT_BASE_URL}`)"
+
+  trigger:
+    build: ./docker/trigger
+    links:
+      - jenkins
+    depends_on:
+      - jenkins
+    container_name: "${PROJECT_NAME}_trigger"
+    command: 'fire'
+  traefik:
+    image: traefik
+    container_name: "${PROJECT_NAME}_traefik"
+    command: --api.insecure=true --providers.docker
+    ports:
+      - '8000:80'
+      - '8080:8080' # Dashboard
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+
+volumes:
+  jenkins_home:
+
+
